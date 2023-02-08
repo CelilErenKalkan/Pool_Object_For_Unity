@@ -171,16 +171,15 @@ public class Pool : MonoBehaviour
         return b;
     }
 
-    public void DeactivateObject(GameObject member)
+    public void DeactivateObject(GameObject member, PoolItemType poolItemType)
     {
-        var memberName = member.tag + "Pool";
-        foreach (var pool in poolObjects)
+        foreach (var item in poolItems)
         {
-            if (memberName == pool.name)
+            if (item.poolItemType == poolItemType)
             {
-                member.transform.SetParent(pool.transform);
-                member.transform.position = pool.transform.position;
-                member.transform.rotation = pool.transform.rotation;
+                member.transform.SetParent(item.parent.transform);
+                member.transform.position = item.parent.transform.position;
+                member.transform.rotation = item.parent.transform.rotation;
                 member.SetActive(false);
             }
         }
@@ -199,9 +198,9 @@ public class Pool : MonoBehaviour
     {
         var enumList = new List<string>();
         foreach (var item in poolItems.Where(item => item.prefabs.Count > 0)
-                     .Where(item => !enumList.Contains(item.prefabs[0].tag)))
+                     .Where(item => !enumList.Contains(item.prefabs[0].name)))
         {
-            enumList.Add(item.prefabs[0].tag);
+            enumList.Add(item.prefabs[0].name);
         }
 
         const string filePathAndName = "Assets/Scripts/PoolItemType.cs";
