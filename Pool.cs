@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -126,6 +127,63 @@ public class Pool : MonoBehaviour
         }
 
         return b;
+    }
+    
+    /// <summary>
+    /// Spawns an item from the selected pool for a limited time
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="poolItemType"></param>
+    /// <param name="parent"></param>
+    /// <param name="activeTime"></param>
+    /// <returns></returns>
+    public GameObject SpawnObject(Vector3 position, PoolItemType poolItemType, Transform parent, float activeTime)
+    {
+        var b = GetFromPool(poolItemType);
+        if (b != null)
+        {
+            if (parent != null) b.transform.SetParent(parent);
+            if (position != null) b.transform.position = position;
+            b.SetActive(true);
+            StartCoroutine(DeactivationTimer());
+        }
+
+        return b;
+
+        IEnumerator DeactivationTimer()
+        {
+            yield return new WaitForSeconds(activeTime);
+            DeactivateObject(b, poolItemType);
+        }
+    }
+        
+    /// <summary>
+    /// Spawns an item from the selected pool with specified member for a limited time
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="poolItemType"></param>
+    /// <param name="parent"></param>
+    /// <param name="childIndex"></param>
+    /// <param name="activeTime"></param>
+    public GameObject SpawnObject(Vector3 position, PoolItemType poolItemType, Transform parent, int childIndex,
+        float activeTime)
+    {
+        var b = GetFromPool(poolItemType, childIndex);
+        if (b != null)
+        {
+            if (parent != null) b.transform.SetParent(parent);
+            if (position != null) b.transform.position = position;
+            b.SetActive(true);
+            StartCoroutine(DeactivationTimer());
+        }
+
+        return b;
+
+        IEnumerator DeactivationTimer()
+        {
+            yield return new WaitForSeconds(activeTime);
+            DeactivateObject(b, poolItemType);
+        }
     }
 
     /// <summary>
