@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -193,30 +192,47 @@ public class Pool : MonoBehaviour
             pool.GetChild(random).SetSiblingIndex(i);
         }
     }
-
-    private void UpdateEnum()
-    {
-        var enumList = new List<string>();
-        foreach (var item in poolItems.Where(item => item.prefabs.Count > 0)
-                     .Where(item => !enumList.Contains(item.prefabs[0].name)))
+        
+#if UNITY_EDITOR
+        private void OnValidate()
         {
-            enumList.Add(item.prefabs[0].name);
+            UpdateEnum();
         }
-
-        const string filePathAndName = "Assets/Scripts/PoolItemType.cs";
-
-        using (var streamWriter = new StreamWriter(filePathAndName))
+        private void UpdateEnum()
         {
-            streamWriter.WriteLine("public enum PoolItemType");
-            streamWriter.WriteLine("{");
-            foreach (var name in enumList)
+            var enumList = new List<string>();
+
+            foreach (var item in pooledItems)
             {
-                streamWriter.WriteLine("\t" + name + ",");
+                if (item.prefabs.Count > 0)
+                {
+                    if (!enumList.Contains(item.prefabs[0].name))
+                    {
+                        enumList.Add(item.prefabs[0].name);
+                    }
+                }
             }
 
-            streamWriter.WriteLine("}");
-        }
+            const string filePathAndName = "Assets/Scripts/Blended/PoolItemType.cs";
+ 
+            using ( var streamWriter = new StreamWriter( filePathAndName ) )
+            {
+                streamWriter.WriteLine( "public enum PoolItemType");
+                streamWriter.WriteLine( "{" );
+                for (var i = 0; i < enumList.Count; i ++)
+                {
+                    streamWriter.WriteLine( "\t" + enumList[i] + " = " + i + ",");
+                }
+                streamWriter.WriteLine( "}" );
+            }
 
-        AssetDatabase.Refresh();
+            for (var i = 0; i < pooledItems.Count; i++)
+            {
+                pooledItems[i].poolItemType = (PoolItemType)i;
+            }
+            
+            AssetDatabase.Refresh();
+        }
+#endif  
     }
 }
