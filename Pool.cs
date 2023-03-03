@@ -8,11 +8,11 @@ using Random = UnityEngine.Random;
 [System.Serializable]
 public class PoolItem
 {
+    public string poolName;
     public List<GameObject> prefabs = new List<GameObject>();
     public int amount;
     public bool expandable;
     public PoolItemType poolItemType;
-    
     [HideInInspector] public GameObject parent;
 }
 
@@ -261,10 +261,11 @@ public class Pool : MonoBehaviour
     /// <param name="amount"></param>
     /// <param name="isExpandable"></param>
     /// <returns></returns>
-    public void CreateNewPool(GameObject newItem, int amount, bool isExpandable)
+    /*public void CreateNewPool(GameObject newItem, int amount, bool isExpandable, string poolName)
     {
         var pooledItem = new PoolItem
         {
+            poolName = poolName,
             amount = amount,
             expandable = isExpandable,
         };
@@ -273,7 +274,7 @@ public class Pool : MonoBehaviour
             
         var go = new GameObject
         {
-            name = pooledItem.prefabs[0].name + "Pool",
+            name = pooledItem.poolName + "Pool",
             transform =
             {
                 position = Vector3.zero,
@@ -283,7 +284,7 @@ public class Pool : MonoBehaviour
 
         pooledItem.parent = go;
         poolObjects.Add(go);
-        pooledItems.Add(pooledItem);
+        dynamicPooledItems.Add(pooledItem);
             
         CreatePoolItems(pooledItem);
         UpdateEnum();
@@ -308,7 +309,7 @@ public class Pool : MonoBehaviour
         {
             pooledItem.prefabs.Add(newItem);
         }
-        
+            
         var go = new GameObject
         {
             name = pooledItem.prefabs[0].name + "Pool",
@@ -325,7 +326,7 @@ public class Pool : MonoBehaviour
 
         CreatePoolItems(pooledItem);
         UpdateEnum();
-    }
+    }*/
 
     private void Awake()
     {
@@ -344,9 +345,11 @@ public class Pool : MonoBehaviour
         var count = pooledItems.Count;
         for (var i = 0; i < count; i++)
         {
+            var name = pooledItems[i].poolName == "" ? pooledItems[i].prefabs[0].name : pooledItems[i].poolName;
+            
             var go = new GameObject
             {
-                name = pooledItems[i].prefabs[0].name + "Pool",
+                name = name + "Pool",
                 transform =
                 {
                     position = Vector3.zero,
@@ -381,7 +384,11 @@ public class Pool : MonoBehaviour
         {
             if (item.prefabs.Count > 0)
             {
-                if (!enumList.Contains(item.prefabs[0].name))
+                if (item.poolName != "" && !enumList.Contains(item.poolName))
+                {
+                    enumList.Add(item.poolName);
+                }
+                else if (!enumList.Contains(item.prefabs[0].name))
                 {
                     enumList.Add(item.prefabs[0].name);
                 }
