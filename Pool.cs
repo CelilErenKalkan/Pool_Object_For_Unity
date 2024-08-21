@@ -205,6 +205,22 @@ public class Pool : MonoBehaviour
             }
         }
     }
+    
+    /// <summary>
+    /// Deactivates the given item and returns it to its' pool
+    /// </summary>
+    /// <param name="member"></param>
+    /// <param name="poolItemType"></param>
+    /// <returns></returns>
+    public void DeactivateObject(GameObject member, PoolItemType poolItemType, float time)
+    {
+        StartCoroutine(DeactivationTimer());
+        IEnumerator DeactivationTimer()
+        {
+            yield return new WaitForSeconds(time);
+            DeactivateObject(member, poolItemType);
+        }
+    }
 
     /// <summary>
     /// Randomizes the selected pool
@@ -254,80 +270,6 @@ public class Pool : MonoBehaviour
         RandomizeSiblings(item.parent.transform);
     }
 
-    /// <summary>
-    /// Creates a pool at runtime
-    /// </summary>
-    /// <param name="newItem"></param>
-    /// <param name="amount"></param>
-    /// <param name="isExpandable"></param>
-    /// <returns></returns>
-    /*public void CreateNewPool(GameObject newItem, int amount, bool isExpandable, string poolName)
-    {
-        var pooledItem = new PoolItem
-        {
-            poolName = poolName,
-            amount = amount,
-            expandable = isExpandable,
-        };
-            
-        pooledItem.prefabs.Add(newItem);
-            
-        var go = new GameObject
-        {
-            name = pooledItem.poolName + "Pool",
-            transform =
-            {
-                position = Vector3.zero,
-                parent = _parentObject.transform
-            }
-        };
-
-        pooledItem.parent = go;
-        poolObjects.Add(go);
-        dynamicPooledItems.Add(pooledItem);
-            
-        CreatePoolItems(pooledItem);
-        UpdateEnum();
-    }
-        
-    /// <summary>
-    /// Creates a pool at runtime with multiple pooled object
-    /// </summary>
-    /// <param name="newItems"></param>
-    /// <param name="amount"></param>
-    /// <param name="isExpandable"></param>
-    /// <returns></returns>
-    public void CreateNewPool(List<GameObject> newItems, int amount, bool isExpandable)
-    {
-        var pooledItem = new PoolItem
-        {
-            amount = amount,
-            expandable = isExpandable,
-        };
-
-        foreach (var newItem in newItems)
-        {
-            pooledItem.prefabs.Add(newItem);
-        }
-            
-        var go = new GameObject
-        {
-            name = pooledItem.prefabs[0].name + "Pool",
-            transform =
-            {
-                position = Vector3.zero,
-                parent = _parentObject.transform
-            }
-        };
-            
-        pooledItem.parent = go;
-        poolObjects.Add(go);
-        pooledItems.Add(pooledItem);
-
-        CreatePoolItems(pooledItem);
-        UpdateEnum();
-    }*/
-
     private void Awake()
     {
         if (Instance != null && Instance != this) Destroy(this);
@@ -367,14 +309,14 @@ public class Pool : MonoBehaviour
         }
     }
         
-#if UNITY_EDITOR        
+/*#if UNITY_EDITOR        
     private void OnValidate()
     {
         UpdateEnum();
     }
-#endif  
-        
-    private void UpdateEnum()
+#endif */
+
+    public void UpdateEnum()
     {
         if (pooledItems.Count <= 0) return;
             
@@ -395,7 +337,7 @@ public class Pool : MonoBehaviour
             }
         }
 
-        const string filePathAndName = "Assets/Scripts/Blended/PoolItemType.cs";
+        const string filePathAndName = "Assets/Scripts/PoolItemType.cs";
  
         using ( var streamWriter = new StreamWriter( filePathAndName ) )
         {
@@ -415,5 +357,20 @@ public class Pool : MonoBehaviour
 #if UNITY_EDITOR
         AssetDatabase.Refresh();
 #endif
+    }
+}
+
+[CustomEditor(typeof(Pool))]
+public class PoolEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        Pool pool = (Pool)target;
+        DrawDefaultInspector();
+        
+        if(GUILayout.Button("Save"))
+        {
+            pool.UpdateEnum();
+        }
     }
 }
